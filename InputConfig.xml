@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <Recipient>jankovdamian@gmail.com</Recipient>
+    <ItemWebResource>
+        <url>google.com</url>
+        <priceGoal>google.com</priceGoal>
+        <regexPricePattern>google.com</regexPricePattern>
+    </ItemWebResource>
+    <ItemWebResource>
+        <url>google.com</url>
+        <priceGoal>google.com</priceGoal>
+        <regexPricePattern>google.com</regexPricePattern>
+    </ItemWebResource>
+</root>
