@@ -1,25 +1,28 @@
 ﻿using System.Collections.Concurrent;
 using System.Net.Http;
+using PriceChecker.Iterfaces;
 
 
 namespace PriceChecker.Helpers
 {
-    public class HttpHelper
+    public class HttpHelper : IResourceSnatcher
     {
         HttpClient _httpClient;
+        IAppLogger _logger;
 
-        public HttpHelper(HttpClient httpclient)
+        public HttpHelper(HttpClient httpclient, IAppLogger messageLogger)
         {
+            _logger= messageLogger;
             _httpClient= httpclient;
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36");
         }
 
-        public async Task<ConcurrentDictionary<string, string>> GetMultipleRequests(IEnumerable<string> inputUrls)
+        public async Task<Dictionary<string, string>> GetUrls(IEnumerable<string> urls)
         {
             List<Task> tasks = new();
-            ConcurrentDictionary<string,string> responses = new();
+            ConcurrentDictionary<string, string> responses = new();
 
-            foreach (var url in inputUrls)
+            foreach (var url in urls)
             {
                 tasks.Add(Task.Run(async () =>
                 {
@@ -28,9 +31,8 @@ namespace PriceChecker.Helpers
             }
 
             await Task.WhenAll(tasks);
-            return responses;
+            return responses.ToDictionary();
         }
-
 
         private async Task<string> GetHttpGet(string url)
         {
@@ -42,7 +44,7 @@ namespace PriceChecker.Helpers
             }
             catch (HttpRequestException e)
             {
-                Console.WriteLine($"Request error: {e.Message}");
+                _logger.AlertFailure($"Error getting a http request {e}");
                 return string.Empty;
             }
         }

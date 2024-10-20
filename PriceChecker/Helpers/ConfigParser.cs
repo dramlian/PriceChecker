@@ -1,53 +1,45 @@
 ﻿using System.Resources;
 using System.Xml;
+using PriceChecker.Iterfaces;
 using PriceChecker.Models;
 
 namespace PriceChecker.Helpers
 {
     public class ConfigParser
     {
-        XmlDocument xmlDocument;
+        XmlDocument _xmlDocument;
+        ISecretGetter _secretGetter;
 
-        public ConfigParser(string documentPath)
+        public ConfigParser(string documentPath, ISecretGetter secretGetter)
         {
-            xmlDocument= new XmlDocument();
-            xmlDocument.Load(documentPath);
+            if (!File.Exists(documentPath))
+            {
+                throw new FileNotFoundException($"No file at path {documentPath}");
+            }
+            _xmlDocument = new XmlDocument();
+            _xmlDocument.Load(documentPath);
+            _secretGetter = secretGetter;
         }
 
         public Config ParseTheValues()
         {
-            XmlNodeList itemNodes = xmlDocument.GetElementsByTagName("ItemWebResource");
+            XmlNodeList itemNodes = _xmlDocument.GetElementsByTagName("ItemWebResource");
             List<ItemWebResource> resources = new ();
 
             foreach (XmlNode itemNode in itemNodes)
             {
                 string url = itemNode["url"]?.InnerText ?? string.Empty;
                 string regexPricePattern = itemNode["regexPricePattern"]?.InnerText ?? string.Empty;
-                int priceGoal = int.Parse(itemNode["priceGoal"]?.InnerText ?? "0");
-                resources.Add(new ItemWebResource(url,regexPricePattern,priceGoal,0));
+                double priceGoal = double.Parse(itemNode["priceGoal"]?.InnerText ?? "0");
+                resources.Add(new ItemWebResource(url,regexPricePattern,priceGoal));
             }
 
-            return new Config(GetRecipientName(), GetNetworkUsername(), GetNetworkPassword(), resources);
-        }
-
-        private string GetNetworkUsername()
-        {
-            return GetElementInConfig("NetworkUserName");
-        }
-
-        private string GetNetworkPassword()
-        {
-            return GetElementInConfig("NetworkPassword");
+            return new Config(GetRecipientName(), _secretGetter.GetPublicKey(), _secretGetter.GetSecretKey(), resources);
         }
 
         private IEnumerable<string> GetRecipientName()
         {
-            return GetElementInConfig("Recipient").Split(',');
-        }
-
-        private string GetElementInConfig(string elementName)
-        {
-            return xmlDocument.GetElementsByTagName(elementName).Item(0)?.InnerText ?? string.Empty;
+            return (_xmlDocument.GetElementsByTagName("Recipient").Item(0)?.InnerText ?? string.Empty).Split(',');
         }
     }
 }

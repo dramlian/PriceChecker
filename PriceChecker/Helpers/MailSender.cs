@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Mail;
+using PriceChecker.Iterfaces;
 using PriceChecker.Models;
 
 namespace PriceChecker.Helpers
@@ -7,9 +8,10 @@ namespace PriceChecker.Helpers
     public class MailSender
     {
         IEnumerable<string> _recipients;
+        IAppLogger _appLogger;
         SmtpClient _smtpClient;
 
-        public MailSender(Config parsedXmlConfig)
+        public MailSender(Config parsedXmlConfig, IAppLogger appLogger)
         {
             _recipients= parsedXmlConfig.recipients;
             _smtpClient = new SmtpClient("in-v3.mailjet.com", 587)
@@ -17,6 +19,7 @@ namespace PriceChecker.Helpers
                 Credentials = new NetworkCredential(parsedXmlConfig.networkUsername, parsedXmlConfig.networkPassword),
                 EnableSsl = true
             };
+            _appLogger = appLogger;
         }
 
         public void SendMail(string subject, string body)
@@ -36,11 +39,11 @@ namespace PriceChecker.Helpers
                     mailMessage.To.Add(recipient);
                 }
                 _smtpClient.Send(mailMessage);
-                Console.WriteLine("Email sent successfully.");
+                _appLogger.AlertSuccess("Email sent successfully.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to send email: {ex.Message}");
+                _appLogger.AlertFailure($"Failed to send email: {ex.Message}");
             }
         }
     }

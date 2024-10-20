@@ -2,10 +2,10 @@
 {
     public class Config
     {
-        public IEnumerable<string>? recipients;
-        public string? networkUsername;
-        public string? networkPassword;
-        public IEnumerable<ItemWebResource>? webResources;
+        public IEnumerable<string> recipients;
+        public string networkUsername;
+        public string networkPassword;
+        public IEnumerable<ItemWebResource> webResources;
 
         public Config(IEnumerable<string> recipients, string networkUsername, string networkPassword, IEnumerable<ItemWebResource> webResources)
         {
