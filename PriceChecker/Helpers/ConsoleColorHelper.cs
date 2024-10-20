@@ -1,22 +1,24 @@
-﻿namespace PriceChecker.Helpers
+﻿using PriceChecker.Iterfaces;
+
+namespace PriceChecker.Helpers
 {
-    public class ConsoleColorHelper
+    public class ConsoleColorHelper : IAppLogger
     {
-        public void PrintSuccess(string message)
+        public void AlertSuccess(string message)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"{DateTime.Now}:{message}");
             Console.ResetColor();
         }
 
-        public void PrintWarning(string message)
+        public void AlertWarning(string message)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"{DateTime.Now}:{message}");
             Console.ResetColor();
         }
 
-        public void PrintError(string message)
+        public void AlertFailure(string message)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"{DateTime.Now}:{message}");

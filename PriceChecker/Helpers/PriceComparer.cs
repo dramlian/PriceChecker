@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using PriceChecker.Iterfaces;
 using PriceChecker.Models;
 
 namespace PriceChecker.Helpers
@@ -6,60 +7,69 @@ namespace PriceChecker.Helpers
     public class PriceComparer
     {
         HttpHelper _httpHelper;
-        Config _config;
-        ConsoleColorHelper _consoleHelper;
+        IEnumerable<ItemWebResource> _webResources;
+        IAppLogger _logger;
 
-        public PriceComparer(HttpHelper httpHelper, Config config)
+        public PriceComparer(HttpHelper httpHelper, IEnumerable<ItemWebResource> webResources, IAppLogger logger)
         {
             _httpHelper= httpHelper;
-            _config= config;
-            _consoleHelper=new ConsoleColorHelper();
+            _webResources = webResources;
+            _logger= logger;
         }
 
-        public async Task<IEnumerable<ItemWebResource>> DetermineAlert()
+        public async Task<IEnumerable<ItemWebResource>> FetchAndComparePrices()
         {
-            var urls=_config.webResources.Select(x=>x.url) ?? Enumerable.Empty<string>();
-            var urlsToWebValue = (await _httpHelper.GetMultipleRequests(urls)).ToDictionary();
-            return ParsePriceAndDetermineAlert(urlsToWebValue);
+            var urls= _webResources.Select(x=>x.url) ?? Enumerable.Empty<string>();
+            return ParsePriceAndDetermineWebResourceType(await _httpHelper.GetUrls(urls));
         }
 
-        private IEnumerable<ItemWebResource> ParsePriceAndDetermineAlert(Dictionary<string, string> urlsToWebValue)
+        private IEnumerable<ItemWebResource> ParsePriceAndDetermineWebResourceType(Dictionary<string, string> urlsToWebValue)
         {
             List<ItemWebResource> returnVal = new (); 
             foreach(var urlToWebValue in urlsToWebValue)
             {
-                var itemWebResource = _config.webResources.Where(x => x.url.Equals(urlToWebValue.Key)).First();
-                if(itemWebResource is not null)
+                var itemWebResource = _webResources.Where(x => x.url.Equals(urlToWebValue.Key)).First();
+                if (itemWebResource is null) { throw new Exception("Problem with the url to webresource relationship"); }
+   
+                var actualPrice = GetTheActualPriceOfItem(itemWebResource.regexPricePattern ?? string.Empty, urlToWebValue.Value, out bool parsingProblem);
+
+                if (parsingProblem)
                 {
-                    if(IsValueSmallerOrEqualThanTargetValue(itemWebResource, urlToWebValue.Value))
-                    {
-                        returnVal.Add(itemWebResource);
-                    }
+                    _logger.AlertFailure($"Problem with parsing the value: {urlToWebValue.Key}");
+                    returnVal.Add(new FailedItemWebResource(itemWebResource));
                 }
                 else
                 {
-                    _consoleHelper.PrintError($"The webresource url was not found! {urlToWebValue.Key}");
+                    itemWebResource.actualPrice = actualPrice;
+                    if (actualPrice <= itemWebResource.priceGoal)
+                    {
+                        itemWebResource.wasThePriceGoalHit = true;
+                    }
+                    returnVal.Add(itemWebResource);
                 }
+
             }
             return returnVal;
         }
 
-        private bool IsValueSmallerOrEqualThanTargetValue(ItemWebResource itemWebResource, string webPageValue)
+        private double GetTheActualPriceOfItem(string regexPattern, string webPageValue, out bool parsingProblem)
+            //the bool indicates problem with parsing
         {
             webPageValue = String.Concat(webPageValue.Where(c => !Char.IsWhiteSpace(c)));
-            var regexPattern = itemWebResource.regexPricePattern;
-            var targetPrice = itemWebResource.priceGoal;
 
             var regex = new Regex(regexPattern);
             var match = regex.Match(webPageValue);
 
-            if (match.Success && double.TryParse(match.Groups[1].Value, out double extractedPrice))
+            if (match.Success && double.TryParse(match.Groups[1].Value.Replace(',', '.'), out double extractedPrice))
             {
-                return extractedPrice <= targetPrice;
+                parsingProblem = false;
+                return extractedPrice;
             }
-
-            _consoleHelper.PrintError($"The webresource url was not found! {itemWebResource.url}");
-            return false;
+            else
+            {
+                parsingProblem = true;
+                return 0;
+            }
         }
     }
 }
