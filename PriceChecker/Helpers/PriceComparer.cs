@@ -6,11 +6,11 @@ namespace PriceChecker.Helpers
 {
     public class PriceComparer
     {
-        HttpHelper _httpHelper;
+        HttpSnatcher _httpHelper;
         IEnumerable<ItemWebResource> _webResources;
         IAppLogger _logger;
 
-        public PriceComparer(HttpHelper httpHelper, IEnumerable<ItemWebResource> webResources, IAppLogger logger)
+        public PriceComparer(HttpSnatcher httpHelper, IEnumerable<ItemWebResource> webResources, IAppLogger logger)
         {
             _httpHelper= httpHelper;
             _webResources = webResources;
