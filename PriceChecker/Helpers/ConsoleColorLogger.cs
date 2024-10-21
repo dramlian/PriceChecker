@@ -2,7 +2,7 @@
 
 namespace PriceChecker.Helpers
 {
-    public class ConsoleColorHelper : IAppLogger
+    public class ConsoleColorLogger : IAppLogger
     {
         public void AlertSuccess(string message)
         {

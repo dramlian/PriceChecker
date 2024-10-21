@@ -6,11 +6,11 @@ namespace PriceChecker.Helpers
 {
     public class PriceComparer
     {
-        HttpHelper _httpHelper;
+        IResourceSnatcher _httpHelper;
         IEnumerable<ItemWebResource> _webResources;
         IAppLogger _logger;
 
-        public PriceComparer(HttpHelper httpHelper, IEnumerable<ItemWebResource> webResources, IAppLogger logger)
+        public PriceComparer(IResourceSnatcher httpHelper, IEnumerable<ItemWebResource> webResources, IAppLogger logger)
         {
             _httpHelper= httpHelper;
             _webResources = webResources;
@@ -30,8 +30,8 @@ namespace PriceChecker.Helpers
             {
                 var itemWebResource = _webResources.Where(x => x.url.Equals(urlToWebValue.Key)).First();
                 if (itemWebResource is null) { throw new Exception("Problem with the url to webresource relationship"); }
-   
-                var actualPrice = GetTheActualPriceOfItem(itemWebResource.regexPricePattern ?? string.Empty, urlToWebValue.Value, out bool parsingProblem);
+
+                itemWebResource.actualPrice = GetTheActualPriceOfItem(itemWebResource.regexPricePattern ?? string.Empty, urlToWebValue.Value, out bool parsingProblem);
 
                 if (parsingProblem)
                 {
@@ -40,8 +40,7 @@ namespace PriceChecker.Helpers
                 }
                 else
                 {
-                    itemWebResource.actualPrice = actualPrice;
-                    if (actualPrice <= itemWebResource.priceGoal)
+                    if (itemWebResource.actualPrice <= itemWebResource.priceGoal)
                     {
                         itemWebResource.wasThePriceGoalHit = true;
                     }

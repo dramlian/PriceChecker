@@ -5,12 +5,12 @@ using PriceChecker.Iterfaces;
 
 namespace PriceChecker.Helpers
 {
-    public class HttpHelper : IResourceSnatcher
+    public class HttpSnatcher : IResourceSnatcher
     {
         HttpClient _httpClient;
         IAppLogger _logger;
 
-        public HttpHelper(HttpClient httpclient, IAppLogger messageLogger)
+        public HttpSnatcher(HttpClient httpclient, IAppLogger messageLogger)
         {
             _logger= messageLogger;
             _httpClient= httpclient;

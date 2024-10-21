@@ -7,9 +7,9 @@ class Program
     {
         while (true)
         {
-            IAppLogger messageLogger = new ConsoleColorHelper();
+            IAppLogger messageLogger = new ConsoleColorLogger();
             ISecretGetter secretGeter = new EnvironmentSecretGetter(messageLogger);
-            var httpHelper = new HttpHelper(new HttpClient(), messageLogger);
+            var httpHelper = new HttpSnatcher(new HttpClient(), messageLogger);
 
             var config = new ConfigParser("InputConfig.xml", secretGeter).ParseTheValues();
             var priceChecker = new PriceComparer(httpHelper, config.webResources, messageLogger);
