@@ -18,9 +18,13 @@ namespace PriceCheckerTesting.Tests
             _snatcher = new HttpSnatcher(new HttpClient(),new TestConsoleLogger());
         }
         [Fact]
-        public void DataAreFetchedWithNoExceptionAndLinkedProperly()
+        public async Task DataAreFetchedWithNoExceptionAndLinkedProperly()
         {
-
+           var data= await _snatcher.GetUrls(new List<string> { "https://google.com", "https://facebook.com" });
+           Assert.NotNull(data["https://google.com"]);
+           Assert.NotNull(data["https://facebook.com"]);
+           Assert.Contains("google", data["https://google.com"]);
+           Assert.Contains("facebook", data["https://facebook.com"]);
         }
     }
 }

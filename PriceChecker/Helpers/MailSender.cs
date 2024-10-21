@@ -22,7 +22,7 @@ namespace PriceChecker.Helpers
             _appLogger = appLogger;
         }
 
-        public void SendMail(string subject, string body)
+        public bool SendMail(string subject, string body)
         {
             try
             {
@@ -40,10 +40,12 @@ namespace PriceChecker.Helpers
                 }
                 _smtpClient.Send(mailMessage);
                 _appLogger.AlertSuccess("Email sent successfully.");
+                return true;
             }
             catch (Exception ex)
             {
                 _appLogger.AlertFailure($"Failed to send email: {ex.Message}");
+                return false;
             }
         }
     }

@@ -23,5 +23,6 @@ namespace PriceCheckerTesting.TestHelpers
 
             return result;
         }
+
     }
 }
