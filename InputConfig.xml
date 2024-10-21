@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <Recipient>jankovdamian@gmail.com</Recipient>
+    <Recipient>jankovdamian@fakegmail.com, peterpeter@fakegmail.com</Recipient>
     <ItemWebResource>
         <url>google.com</url>
-        <priceGoal>google.com</priceGoal>
-        <regexPricePattern>google.com</regexPricePattern>
+        <priceGoal>123.5</priceGoal>
+        <regexPricePattern>someregex</regexPricePattern>
     </ItemWebResource>
     <ItemWebResource>
         <url>google.com</url>
-        <priceGoal>google.com</priceGoal>
-        <regexPricePattern>google.com</regexPricePattern>
+        <priceGoal>563.2</priceGoal>
+        <regexPricePattern>someregex</regexPricePattern>
     </ItemWebResource>
 </root>
