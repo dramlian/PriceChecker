@@ -1,13 +1,38 @@
-### Price Checker ###
+# PriceChecker
 
-The tool takes a config in a format (see the InputConfig.xml file) and
-checks a price of that item on the url you provided.
-Important note is that you need to have mailjet smtp account set up with
-private and public key added preferably to your host machine system variables
-under names PUBLIC_KEY_PARSERTOOL and PRIVATE_KEY_PARSERTOOL respectively.
+A .NET tool that monitors product prices on the web and notifies you by email when your target price is hit.
 
-The outcome of the tool is an email sent with a table that gives you
-your target price, the actual price and information wether the pricegoal
-was hit. If there was a problem with the value parsing that is also
-represented in the mail.
+## How It Works
+
+1. Define items to track in `InputConfig.xml` — each entry has a URL, a target price, and a regex to extract the current price.
+2. The tool fetches each page, parses the price, and compares it to your goal.
+3. Every 30 minutes, it sends an email summary via **Mailjet SMTP** showing actual vs. target prices and whether each goal was reached.
+
+## Configuration
+
+```xml
+<root>
+    <Recipient>you@example.com</Recipient>
+    <ItemWebResource>
+        <url>https://example.com/product</url>
+        <priceGoal>49.99</priceGoal>
+        <regexPricePattern>price-regex</regexPricePattern>
+    </ItemWebResource>
+</root>
+```
+
+## Setup
+
+Set your Mailjet SMTP keys as environment variables:
+
+```
+PUBLIC_KEY_PARSERTOOL=<your-public-key>
+PRIVATE_KEY_PARSERTOOL=<your-private-key>
+```
+
+Then run:
+
+```bash
+dotnet run --project PriceChecker
+```
 
